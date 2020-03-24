@@ -157,27 +157,29 @@ class Map extends React.Component {
    */
   onPlaceSelected = place => {
     console.log(place);
-    const address = place.formatted_address,
-      addressArray = place.address_components,
-      city = this.getCity(addressArray),
-      area = this.getArea(addressArray),
-      state = this.getState(addressArray),
-      latValue = place.geometry.location.lat(),
-      lngValue = place.geometry.location.lng(); // Set these values in the state.
-    this.setState({
-      address: address ? address : "",
-      area: area ? area : "",
-      city: city ? city : "",
-      state: state ? state : "",
-      markerPosition: {
-        lat: latValue,
-        lng: lngValue
-      },
-      mapPosition: {
-        lat: latValue,
-        lng: lngValue
-      }
-    });
+    if (place.address_components) {
+      const address = place.formatted_address,
+        addressArray = place.address_components,
+        city = this.getCity(addressArray),
+        area = this.getArea(addressArray),
+        state = this.getState(addressArray),
+        latValue = place.geometry.location.lat(),
+        lngValue = place.geometry.location.lng(); // Set these values in the state.
+      this.setState({
+        address: address ? address : "",
+        area: area ? area : "",
+        city: city ? city : "",
+        state: state ? state : "",
+        markerPosition: {
+          lat: latValue,
+          lng: lngValue
+        },
+        mapPosition: {
+          lat: latValue,
+          lng: lngValue
+        }
+      });
+    }
   };
   /**
    * When the marker is dragged you get the lat and long using the functions available from event object.
@@ -231,7 +233,8 @@ class Map extends React.Component {
               marginBottom: "100px"
             }}
             onPlaceSelected={this.onPlaceSelected}
-            types={["(regions)"]}
+            types
+            componentRestrictions={{ country: "ca" }}
           />
           {/*Marker*/}
           <Marker
