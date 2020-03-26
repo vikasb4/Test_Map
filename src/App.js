@@ -17,7 +17,6 @@ class App extends PureComponent {
 
   onSubmit = (states) => {
     const {newDescription, newIncidentNumber, newSource, newType} = states
-    console.log("APP js", newType);
     this.setState({newDescription, newIncidentNumber, newType, newSource})
   }
 

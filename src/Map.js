@@ -12,19 +12,47 @@ import Geocode from "react-geocode";
 Geocode.setApiKey("AIzaSyB0F5K2kf6hXig1dU0HGlRzKcnPWs270OY");
 Geocode.enableDebug();
 
-function isEquivalent(a, b) {
-  var aProps = Object.getOwnPropertyNames(a);
+function grabDifference(a, b) {
+  let result = []
+  let aList = []
+  let bList = []
+  for(let i = 0; i < a.newType.length; i++){
+    let aEntry = {
+      newDescription: a.newDescription,
+      newIncidentNumber: a.newIncidentNumber,
+      newSource: a.newSource,
+      newType: a.newType[i]
+    }
+    aList.push(aEntry)
+  }
   var bProps = Object.getOwnPropertyNames(b);
-  if (aProps.length != bProps.length) {
-      return false;
+  if(bProps.length === 0){
+    return aList;
   }
-  for (var i = 0; i < aProps.length; i++) {
-      var propName = aProps[i];
-      if (a[propName] !== b[propName]) {
-          return false;
+  for(let i = 0; i < b.newType.length; i++){
+    let bEntry = {
+      newDescription: b.newDescription,
+      newIncidentNumber: b.newIncidentNumber,
+      newSource: b.newSource,
+      newType: b.newType[i]
+    }
+    bList.push(bEntry)
+  }
+  for (let i = 0; i < aList.length; i++){
+    let count = 0;
+    for (let j = 0; j < bList.length; j ++){
+      if(aList[i].newDescription !== bList[j].newDescription ||
+        aList[i].newIncidentNumber !== bList[j].newIncidentNumber ||
+        aList[i].newSource !== bList[j].newSource ||
+        aList[i].newType !== bList[j].newType ){
+        count += 1;
       }
+    }
+    if(count === bList.length){
+      result.push(aList[i])
+    }
   }
-  return true;
+  return result
 }
 
 class Map extends React.Component {
@@ -187,7 +215,7 @@ class Map extends React.Component {
       latValue = place.geometry.location.lat(),
       lngValue = place.geometry.location.lng(); // Set these values in the state.
       let newAdded = {
-        "INCIDENT_NUMBER": "789456",
+        "INCIDENT_NUMBER": "XXXXXX",
         "TYPE": "",
         "SOURCE": address,
         "DESCRIPTION": city + "," + area + "," + state,
@@ -223,15 +251,22 @@ addIncident(newIncident, ref) {
   render() {
     let tmpReceived = this.props.newRecord;
     const {newIncidentNumber,newType, newSource, newDescription} = tmpReceived;
-    if(newIncidentNumber && newType && newSource && newDescription && !isEquivalent(tmpReceived, this.state.refEntry)){
-      let newAdded = {
-        "INCIDENT_NUMBER": newIncidentNumber,
-        "TYPE": newType,
-        "SOURCE": newSource,
-        "DESCRIPTION": newDescription,
-        "coordinates": [this.state.mapPosition.lat , this.state.mapPosition.lng]
+    let tmpLat = this.state.mapPosition.lat;
+    let tmpLng = this.state.mapPosition.lng;
+    let newEntry = grabDifference(tmpReceived, this.state.refEntry)
+    if(newIncidentNumber && newType && newSource && newDescription && newEntry.length !== 0){
+      for(let i = 0; i < newEntry.length; i++){ 
+        let newAdded = {
+          "INCIDENT_NUMBER": newEntry[i].newIncidentNumber,
+          "TYPE": newEntry[i].newType,
+          "SOURCE": newEntry[i].newSource,
+          "DESCRIPTION": newEntry[i].newDescription,
+          "coordinates": [tmpLat , tmpLng]
+        }
+        tmpLat += 0.00008
+        tmpLng += 0.00008
+        this.addIncident(newAdded, tmpReceived);
       }
-      this.addIncident(newAdded, tmpReceived);
     }
     const AsyncMap = withScriptjs(
       withGoogleMap(props => (
