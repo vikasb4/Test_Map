@@ -12,6 +12,21 @@ import Geocode from "react-geocode";
 Geocode.setApiKey("AIzaSyB0F5K2kf6hXig1dU0HGlRzKcnPWs270OY");
 Geocode.enableDebug();
 
+function isEquivalent(a, b) {
+  var aProps = Object.getOwnPropertyNames(a);
+  var bProps = Object.getOwnPropertyNames(b);
+  if (aProps.length != bProps.length) {
+      return false;
+  }
+  for (var i = 0; i < aProps.length; i++) {
+      var propName = aProps[i];
+      if (a[propName] !== b[propName]) {
+          return false;
+      }
+  }
+  return true;
+}
+
 class Map extends React.Component {
   constructor(props) {
     super(props);
@@ -32,8 +47,8 @@ class Map extends React.Component {
         lng: this.props.center.lng
       },
       selected: false,
-      markers: [...dummyLocation.data]
-
+      incidents: [...dummyLocation.data],
+      refEntry: {}
     };
   }
   /**
@@ -50,8 +65,6 @@ class Map extends React.Component {
           city = this.getCity(addressArray),
           area = this.getArea(addressArray),
           state = this.getState(addressArray);
-
-        // console.log("city", city, area, state);
 
         this.setState({
           address: address ? address : "",
@@ -158,7 +171,7 @@ class Map extends React.Component {
    *
    * @param event
    */
-  onInfoWindowClose = event => {this.setState({seleted: false})};
+  onInfoWindowClose = event => {this.setState({selected: false})};
   /**
    * When the user types an address in the search box
    * @param place
@@ -180,7 +193,7 @@ class Map extends React.Component {
         "DESCRIPTION": city + "," + area + "," + state,
         "coordinates": [latValue , lngValue]
       }
-      let tmpMarkers = this.state.markers;
+      let tmpMarkers = this.state.incidents;
       tmpMarkers.push(newAdded);
       this.setState({
         address: address ? address : "",
@@ -195,72 +208,31 @@ class Map extends React.Component {
           lat: latValue,
           lng: lngValue
         },
-        markers: tmpMarkers
+        incidents: tmpMarkers
       });
     }
   };
-  // /**
-  //  * When the marker is dragged you get the lat and long using the functions available from event object.
-  //  * Use geocode to get the address, city, area and state from the lat and lng positions.
-  //  * And then set those values in the state.
-  //  *
-  //  * @param event
-  //  */
-  onMarkerDragEnd = event => {
-    console.log("event", event.latLng.lat(), ",",event.latLng.lng());
-    let newLat = event.latLng.lat(),
-      newLng = event.latLng.lng(),
-      addressArray = [];
-    Geocode.fromLatLng(newLat, newLng).then(
-      response => {
-        const address = response.results[0].formatted_address,
-          addressArray = response.results[0].address_components,
-          city = this.getCity(addressArray),
-          area = this.getArea(addressArray),
-          state = this.getState(addressArray);
-        this.setState({
-          address: address ? address : "",
-          area: area ? area : "",
-          city: city ? city : "",
-          state: state ? state : "",
-          // markerPosition: {        
-          //   lat: newLat,
-          //   lng: newLng
-          // }
-        });
-      },
-      error => {
-        console.error(error);
-      }
-    );
-  };
 
-  insertNewAddedRecord(originalList, receivedRecord){
-    const {newIncidentNumber,newType, newSource, newDescription} = receivedRecord;
-    let coordinates = [43.6487763240599 , -79.37150329620363]
-    let tempIncidentNumber = newIncidentNumber;
-    for(let i = 0; i < newType.length; i++){
-      if(newIncidentNumber && newType[i] && newSource && newDescription){
-        tempIncidentNumber ++;
-        let newAdded = {
-          "INCIDENT_NUMBER": tempIncidentNumber,
-          "TYPE": newType[i],
-          "SOURCE": newSource,
-          "DESCRIPTION": newDescription,
-          "coordinates": [coordinates[0] , coordinates[1]]
-        }
-        coordinates[0] += 0.00008
-        coordinates[1] += 0.00008
-        originalList.push(newAdded);
-      }
-    }
-    return originalList
-  }
-
+addIncident(newIncident, ref) {
+  let incidentList = this.state.incidents;
+  incidentList.push(newIncident);
+  this.setState({incidents: incidentList,
+  refEntry: ref});
+}
 
   render() {
-    let tmpData = this.state.markers;
-    tmpData = this.insertNewAddedRecord(tmpData, this.props.newRecord)
+    let tmpReceived = this.props.newRecord;
+    const {newIncidentNumber,newType, newSource, newDescription} = tmpReceived;
+    if(newIncidentNumber && newType && newSource && newDescription && !isEquivalent(tmpReceived, this.state.refEntry)){
+      let newAdded = {
+        "INCIDENT_NUMBER": newIncidentNumber,
+        "TYPE": newType,
+        "SOURCE": newSource,
+        "DESCRIPTION": newDescription,
+        "coordinates": [this.state.mapPosition.lat , this.state.mapPosition.lng]
+      }
+      this.addIncident(newAdded, tmpReceived);
+    }
     const AsyncMap = withScriptjs(
       withGoogleMap(props => (
         <GoogleMap
@@ -281,11 +253,36 @@ class Map extends React.Component {
             componentRestrictions={{ country: "ca" }}
           />
           {/*Marker*/}
-          {tmpData.map( location =>
+          {this.state.incidents.map((location, index) =>
             <Marker
               key={location.INCIDENT_NUMBER}
               draggable={true}
-              onDragEnd={this.onMarkerDragEnd}
+              onDragEnd={event => {
+                let newLat = event.latLng.lat(),
+                  newLng = event.latLng.lng(),
+                  addressArray = [];
+                Geocode.fromLatLng(newLat, newLng).then(
+                  response => {
+                    const address = response.results[0].formatted_address,
+                      addressArray = response.results[0].address_components,
+                      city = this.getCity(addressArray),
+                      area = this.getArea(addressArray),
+                      state = this.getState(addressArray);
+                    this.setState({
+                      address: address ? address : "",
+                      area: area ? area : "",
+                      city: city ? city : "",
+                      state: state ? state : ""
+                    });
+                  },
+                  error => {
+                    console.error(error);
+                  }
+                );
+                let newIncidents = this.state.incidents;
+                newIncidents[index].coordinates = [newLat, newLng];
+                this.setState({incidents: newIncidents});
+              }}
               position={{
                 lat: location.coordinates[0],
                 lng: location.coordinates[1]
@@ -354,4 +351,5 @@ class Map extends React.Component {
     return map;
   }
 }
+
 export default Map;
