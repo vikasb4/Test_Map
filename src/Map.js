@@ -32,6 +32,8 @@ class Map extends React.Component {
         lng: this.props.center.lng
       },
       selected: false,
+      markers: [...dummyLocation.data]
+
     };
   }
   /**
@@ -165,12 +167,21 @@ class Map extends React.Component {
     console.log(place);
     if (place.address_components) {
       const address = place.formatted_address,
-        addressArray = place.address_components,
-        city = this.getCity(addressArray),
-        area = this.getArea(addressArray),
-        state = this.getState(addressArray),
-        latValue = place.geometry.location.lat(),
-        lngValue = place.geometry.location.lng(); // Set these values in the state.
+      addressArray = place.address_components,
+      city = this.getCity(addressArray),
+      area = this.getArea(addressArray),
+      state = this.getState(addressArray),
+      latValue = place.geometry.location.lat(),
+      lngValue = place.geometry.location.lng(); // Set these values in the state.
+      let newAdded = {
+        "INCIDENT_NUMBER": "789456",
+        "TYPE": "",
+        "SOURCE": address,
+        "DESCRIPTION": city + "," + area + "," + state,
+        "coordinates": [latValue , lngValue]
+      }
+      let tmpMarkers = this.state.markers;
+      tmpMarkers.push(newAdded);
       this.setState({
         address: address ? address : "",
         area: area ? area : "",
@@ -183,7 +194,8 @@ class Map extends React.Component {
         mapPosition: {
           lat: latValue,
           lng: lngValue
-        }
+        },
+        markers: tmpMarkers
       });
     }
   };
@@ -229,7 +241,6 @@ class Map extends React.Component {
     let tempIncidentNumber = newIncidentNumber;
     for(let i = 0; i < newType.length; i++){
       if(newIncidentNumber && newType[i] && newSource && newDescription){
-        console.log(newType[i])
         tempIncidentNumber ++;
         let newAdded = {
           "INCIDENT_NUMBER": tempIncidentNumber,
@@ -248,7 +259,7 @@ class Map extends React.Component {
 
 
   render() {
-    let tmpData = [...dummyLocation.data]
+    let tmpData = this.state.markers;
     tmpData = this.insertNewAddedRecord(tmpData, this.props.newRecord)
     const AsyncMap = withScriptjs(
       withGoogleMap(props => (
@@ -282,10 +293,12 @@ class Map extends React.Component {
               animation={2}
               icon={{
                 url: location.TYPE === "CCTV" ? 
-                  "http://maps.google.com/mapfiles/ms/icons/red-dot.png" :
+                  "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" :
                   location.TYPE === "CRIME SCENE"?
                   "http://maps.google.com/mapfiles/ms/icons/green-dot.png":
-                  "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+                  location.TYPE === "VENDOR"?
+                  "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png":
+                  "http://maps.google.com/mapfiles/ms/icons/red-dot.png" ,
                 scaledSize: { width: 45, height: 45 }
               }}
 
