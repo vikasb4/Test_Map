@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+        "INCIDENT_NUMBER": 123456,
+        "TYPE": "CCTV",
+        "SOURCE": "CF Toronto Eaton Centre",
+        "DESCRIPTION": "220 Yonge St Toronto, ON M5B 2H1",
+        "coordinates": [43.65442768211011, -79.38068717987062] 
+    },
+    {
+        "INCIDENT_NUMBER": 523456,
+        "TYPE": "CRIME SCENE",
+        "SOURCE": "Google Canada",
+        "DESCRIPTION": "111 Richmond St W #12 Toronto, ON M5H 2G4",
+        "coordinates": [43.650360, -79.383820]
+    },
+    {
+        "INCIDENT_NUMBER": 223456,
+        "TYPE": "VENDOR",
+        "SOURCE": "TORONTO GENERAL HOSPITAL",
+        "DESCRIPTION": "200 Elizabeth St Toronto, ON M5G 2C4",
+        "coordinates": [43.6591781376092 , -79.38798278839113]
+    },
+    {
+        "INCIDENT_NUMBER": 323456,
+        "TYPE": "CCTV",
+        "SOURCE": "Ryerson University",
+        "DESCRIPTION": "350 Victoria St Toronto, ON M5B 2K3",
+        "coordinates": [43.65765679080709 , -79.3787559893799]
+    },
+    {
+        "INCIDENT_NUMBER": 423456,
+        "TYPE": "CRIME SCENE",
+        "SOURCE": "Art Gallery of Ontario",
+        "DESCRIPTION": "317 Dundas St W. Toronto, ON M5T 1G4",
+        "coordinates": [43.653651428170235 , -79.39248889953615]
+    }
+  ]
+}
