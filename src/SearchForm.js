@@ -8,13 +8,12 @@ class SearchForm extends PureComponent{
             newIncidentNumber : "",
             newSource: "",
             newDescription: "",
-            newType: "",
-            radioCheckedV: false,
-            radioCheckedCCTV: false,
-            radioCheckedVCS: false        
+            newType: [],
+            cctvChecked: false,
+            csChecked: false,
+            vendorChecked: false
         };
     }
-
     handleChange = (event) => {
         this.setState({ [event.target.name]: event.target.value }); 
     }
@@ -24,10 +23,10 @@ class SearchForm extends PureComponent{
             newIncidentNumber : "",
             newSource: "",
             newDescription: "",
-            newType: "",
-            radioCheckedV: false,
-            radioCheckedCCTV: false,
-            radioCheckedVCS: false
+            newType: [],
+            cctvChecked: false,
+            csChecked: false,
+            vendorChecked: false
         })
     }
 
@@ -40,6 +39,16 @@ class SearchForm extends PureComponent{
             newSource,
             newType
         });
+    }
+
+    buttonDisable = () => {
+        const {newIncidentNumber, newSource, newType, newDescription} = this.state;
+        return(
+            newIncidentNumber === "" ||
+            newSource === "" ||
+            newDescription === "" ||
+            newType.length === 0
+        );
     }
 
     render() {
@@ -55,47 +64,79 @@ class SearchForm extends PureComponent{
                         <label>Description</label>
                         <input type="text" name="newDescription" value={this.state.newDescription} onChange={this.handleChange} />
                         <div style={{marginTop: `5%`}}>                
-                            <input type="submit" className="ui primary button" value="Submit" />
+                            <input type="submit" className="ui primary button" value="Submit" disabled={this.buttonDisable()}/>
                             <button type="button" className="ui cancel button" style={{marginLeft: `2%`}} onClick={this.clearFields}>Clear</button>
                         </div>
                     </div>
-                    <div className="ui form" style={{float: `right`, marginTop:`14%`, marginRight: `20%`}}>
-                        <div className="grouped fields">
-                            <div className="field">
-                                <div className="ui radio checkbox">
-                                    <input type="radio" name="newType"
-                                        value="CCTV"
-                                        onChange={this.handleChange} 
-                                        checked={this.state.radioCheckedCCTV}
-                                        onClick={() => this.setState({ radioCheckedCCTV: true, radioCheckedCS: false, radioCheckedV: false })}
-                                    />
-                                    <label>CCTV</label>
-                                </div>
-                            </div>
+                    <div style={{float: `right`, marginTop:`14%`, marginRight: `20%`}}>
+                        <div className="ui checkbox">
+                            <input type="checkbox" name="newType"
+                                value="CCTV"
+                                checked={this.state.cctvChecked}
+                                onClick={async () => {
+                                    let tmpChecked = this.state.cctvChecked;
+                                    await this.setState({cctvChecked: !tmpChecked});
+                                    let tmpType = [...this.state.newType]
+                                    if(this.state.cctvChecked){
+                                        tmpType.push("CCTV")
+                                        await this.setState({newType: tmpType})
+                                    }else{
+                                        let filteredType = tmpType.filter( type => {
+                                            return type !== "CCTV"
+                                        })
+                                        await this.setState({newType: filteredType})
+                                    }
+                                }}
+                            />
+                            <label>CCTV</label>
                         </div>
-                        <div className="field">
-                            <div className="ui radio checkbox">
-                                <input type="radio"
-                                    name="newType"
-                                    value="CRIME SCENE" 
-                                    onChange={this.handleChange} 
-                                    checked={this.state.radioCheckedCS}
-                                    onClick={() => this.setState({ radioCheckedCS: true, radioCheckedCCTV: false, radioCheckedV: false})}
-                                />
-                                <label>CRIME SCENE</label>
-                            </div>
+                        <br/><br/>
+                        <div className="ui checkbox">
+                            <input type="checkbox"
+                                name="newType"
+                                value="CRIME SCENE" 
+                                // onChange={this.handleChange} 
+                                checked={this.state.csChecked}
+                                onClick={async () => {
+                                    let tmpChecked = this.state.csChecked
+                                    await this.setState({csChecked: !tmpChecked});
+                                    let tmpType = [...this.state.newType]
+                                    if(this.state.csChecked){
+                                        tmpType.push("CRIME SCENE")
+                                        await this.setState({newType: tmpType})
+                                    }else{
+                                        let filteredType = tmpType.filter( type => {
+                                            return type !== "CRIME SCENE"
+                                        })
+                                        await this.setState({newType: filteredType})
+                                    }
+                                }}                            
+                            />
+                            <label>CRIME SCENE</label>
                         </div>
-                        <div class="field">
-                            <div class="ui radio checkbox">
-                                <input type="radio"
-                                 name="newType" 
-                                 value="VENDOR" 
-                                 onChange={this.handleChange} 
-                                 checked={this.state.radioCheckedV}
-                                 onClick={() => this.setState({ radioCheckedV: true, radioCheckedCS: false, radioCheckedCCTV: false })}
-                                />
-                                <label>VENDOR</label>
-                            </div>
+                        <br/><br/>
+                        <div className="ui checkbox">
+                            <input type="checkbox"
+                                name="newType" 
+                                value="VENDOR" 
+                                // onChange={this.handleChange}
+                                checked={this.state.vendorChecked}
+                                onClick={async () => {
+                                    let tmpChecked = this.state.vendorChecked
+                                    await this.setState({vendorChecked: !tmpChecked});
+                                    let tmpType = [...this.state.newType]
+                                    if(this.state.vendorChecked){
+                                        tmpType.push("VENDOR")
+                                        await this.setState({newType: tmpType})
+                                    }else{
+                                        let filteredType = tmpType.filter( type => {
+                                            return type !== "VENDOR"
+                                        })
+                                        await this.setState({newType: filteredType})
+                                    }
+                                }}
+                            />
+                            <label>VENDOR</label>
                         </div>
                     </div>
                 </form>

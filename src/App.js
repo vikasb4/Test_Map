@@ -3,7 +3,6 @@ import logo from './logo.svg';
 import './App.css';
 import SearchForm from './SearchForm';
 import Map from './Map';
-import MapComponent from './MapComponent';
 
 class App extends PureComponent {
   constructor(){
@@ -12,12 +11,13 @@ class App extends PureComponent {
       newIncidentNumber : "",
       newSource : "",
       newDescription : "",
-      newType : ""
+      newType : []
     }
   }
 
   onSubmit = (states) => {
     const {newDescription, newIncidentNumber, newSource, newType} = states
+    console.log("APP js", newType);
     this.setState({newDescription, newIncidentNumber, newType, newSource})
   }
 

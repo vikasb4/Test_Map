@@ -71,7 +71,6 @@ class Map extends React.Component {
    * @return {boolean}
    */
   shouldComponentUpdate(nextProps, nextState) {
-    console.log("shouldComponentUpdate: ", nextProps, nextState)
     if (
       this.state.markerPosition.lat !== this.props.center.lat ||
       this.state.address !== nextState.address ||
@@ -224,23 +223,33 @@ class Map extends React.Component {
     );
   };
 
+  insertNewAddedRecord(originalList, receivedRecord){
+    const {newIncidentNumber,newType, newSource, newDescription} = receivedRecord;
+    let coordinates = [43.6487763240599 , -79.37150329620363]
+    let tempIncidentNumber = newIncidentNumber;
+    for(let i = 0; i < newType.length; i++){
+      if(newIncidentNumber && newType[i] && newSource && newDescription){
+        console.log(newType[i])
+        tempIncidentNumber ++;
+        let newAdded = {
+          "INCIDENT_NUMBER": tempIncidentNumber,
+          "TYPE": newType[i],
+          "SOURCE": newSource,
+          "DESCRIPTION": newDescription,
+          "coordinates": [coordinates[0] , coordinates[1]]
+        }
+        coordinates[0] += 0.00008
+        coordinates[1] += 0.00008
+        originalList.push(newAdded);
+      }
+    }
+    return originalList
+  }
+
 
   render() {
     let tmpData = [...dummyLocation.data]
-    let tmpReceived = this.props.newRecord;
-    const {newIncidentNumber,newType, newSource, newDescription} = tmpReceived;
-    if(newIncidentNumber && newType && newSource && newDescription){
-      let newAdded = {
-        "INCIDENT_NUMBER": newIncidentNumber,
-        "TYPE": newType,
-        "SOURCE": newSource,
-        "DESCRIPTION": newDescription,
-        "coordinates": [43.6487763240599 , -79.37150329620363]
-      }
-      tmpData.push(newAdded);
-    }
-    console.log("new record", this.props.newRecord)
-    // return <h1>{this.props.newRecord.newIncidentNumber}</h1>
+    tmpData = this.insertNewAddedRecord(tmpData, this.props.newRecord)
     const AsyncMap = withScriptjs(
       withGoogleMap(props => (
         <GoogleMap
