@@ -1,26 +1,41 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import SearchForm from './SearchForm';
+import Map from './Map';
+import MapComponent from './MapComponent';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends PureComponent {
+  constructor(){
+    super()
+    this.state = {
+      newIncidentNumber : "",
+      newSource : "",
+      newDescription : "",
+      newType : ""
+    }
+  }
+
+  onSubmit = (states) => {
+    const {newDescription, newIncidentNumber, newSource, newType} = states
+    this.setState({newDescription, newIncidentNumber, newType, newSource})
+  }
+
+  render(){
+    const {newDescription, newIncidentNumber, newSource, newType} = this.state
+    return (
+      <div>
+        <SearchForm onSubmit={this.onSubmit}/>
+        <Map
+          center={{ lat: 43.6532, lng: -79.3832 }}
+          height="300px"
+          zoom={15}
+          newRecord={{newDescription, newIncidentNumber, newSource, newType}}
+        />
+      </div>
+    );
+  }
+
 }
 
 export default App;

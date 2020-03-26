@@ -1,6 +1,4 @@
 import React, {PureComponent} from "react";
-import * as dummyLocation from "./dummyData.json"
-import * as fs from 'fs';
 
 class SearchForm extends PureComponent{
     
@@ -10,11 +8,12 @@ class SearchForm extends PureComponent{
             newIncidentNumber : "",
             newSource: "",
             newDescription: "",
-            newType: ""
+            newType: "",
+            radioCheckedV: false,
+            radioCheckedCCTV: false,
+            radioCheckedVCS: false        
         };
-
     }
-    writeJsonFile = require('write-json-file');
 
     handleChange = (event) => {
         this.setState({ [event.target.name]: event.target.value }); 
@@ -24,51 +23,83 @@ class SearchForm extends PureComponent{
         this.setState({            
             newIncidentNumber : "",
             newSource: "",
-            newDescription: ""
+            newDescription: "",
+            newType: "",
+            radioCheckedV: false,
+            radioCheckedCCTV: false,
+            radioCheckedVCS: false
         })
     }
 
     onSubmit =  (event) =>  {
-        // console.log("submit", this.state.newType)
-        // console.log(this.state.newSource, this.state.newDescription)
+        event.preventDefault();
+        const {newDescription, newIncidentNumber, newSource, newType} = this.state;
+        this.props.onSubmit({
+            newDescription,
+            newIncidentNumber,
+            newSource,
+            newType
+        });
     }
 
     render() {
         let addForm;
         addForm = (
             <div style={{float:"left", width:`50%`}}>
-            <form className="ui form" onSubmit={this.onSubmit}>
-              <div style={{float: "left", marginTop:`10%`, marginLeft: `5%`, width: `50%`}}>
-                <label>Incident Number</label>
-                <input type="text" name="newIncidentNumber" value={this.state.newIncidentNumber} onChange={this.handleChange} />
-                <label>Source</label>
-                <input type="text" name="newSource" value={this.state.newSource} onChange={this.handleChange}/>
-                <label>Description</label>
-                <input type="text" name="newDescription" value={this.state.newDescription} onChange={this.handleChange} />
-                <div style={{marginTop: `5%`}}>                
-                    <input type="submit" className="ui primary button" value="Submit" />
-                    <button type="button" className="ui cancel button" style={{marginLeft: `2%`}} onClick={this.clearFields}>Clear</button>
-                </div>
-              </div>
-              <div style={{float: `right`, marginTop:`14%`, marginRight: `10%`}}>
-                <div className="ui checkbox">
-                    <input type="checkbox" name="newType" value="CCTV" onChange={this.handleChange}/>
-                    <label> CCTV</label>
-                </div>
-                <br/><br/>
-                <div className="ui checkbox">
-                    <input type="checkbox"  name="newType" value="Crime Scene" onChange={this.handleChange}/>
-                    <label> Crime Scene</label>
-                </div>
-                <br/><br/>
-                <div className="ui checkbox">
-                    <input type="checkbox"  name="newType" value="Vendor" onChange={this.handleChange}/>
-                    <label> Vendor</label>
-                </div>
-
-              </div>
-            </form>
-          </div>
+                <form className="ui form" onSubmit={this.onSubmit}>
+                    <div style={{float: "left", marginTop:`10%`, marginLeft: `5%`, width: `50%`}}>
+                        <label>Incident Number</label>
+                        <input type="text" name="newIncidentNumber" value={this.state.newIncidentNumber} onChange={this.handleChange} />
+                        <label>Source</label>
+                        <input type="text" name="newSource" value={this.state.newSource} onChange={this.handleChange}/>
+                        <label>Description</label>
+                        <input type="text" name="newDescription" value={this.state.newDescription} onChange={this.handleChange} />
+                        <div style={{marginTop: `5%`}}>                
+                            <input type="submit" className="ui primary button" value="Submit" />
+                            <button type="button" className="ui cancel button" style={{marginLeft: `2%`}} onClick={this.clearFields}>Clear</button>
+                        </div>
+                    </div>
+                    <div className="ui form" style={{float: `right`, marginTop:`14%`, marginRight: `20%`}}>
+                        <div className="grouped fields">
+                            <div className="field">
+                                <div className="ui radio checkbox">
+                                    <input type="radio" name="newType"
+                                        value="CCTV"
+                                        onChange={this.handleChange} 
+                                        checked={this.state.radioCheckedCCTV}
+                                        onClick={() => this.setState({ radioCheckedCCTV: true, radioCheckedCS: false, radioCheckedV: false })}
+                                    />
+                                    <label>CCTV</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="field">
+                            <div className="ui radio checkbox">
+                                <input type="radio"
+                                    name="newType"
+                                    value="CRIME SCENE" 
+                                    onChange={this.handleChange} 
+                                    checked={this.state.radioCheckedCS}
+                                    onClick={() => this.setState({ radioCheckedCS: true, radioCheckedCCTV: false, radioCheckedV: false})}
+                                />
+                                <label>CRIME SCENE</label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="ui radio checkbox">
+                                <input type="radio"
+                                 name="newType" 
+                                 value="VENDOR" 
+                                 onChange={this.handleChange} 
+                                 checked={this.state.radioCheckedV}
+                                 onClick={() => this.setState({ radioCheckedV: true, radioCheckedCS: false, radioCheckedCCTV: false })}
+                                />
+                                <label>VENDOR</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         )
         return addForm;
     }

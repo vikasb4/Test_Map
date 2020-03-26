@@ -22,6 +22,7 @@ class Map extends React.Component {
       state: "",
       source: "",
       claimNumber: "",
+      description: "",
       mapPosition: {
         lat: this.props.center.lat,
         lng: this.props.center.lng
@@ -31,17 +32,12 @@ class Map extends React.Component {
         lng: this.props.center.lng
       },
       selected: false,
-      newIncidentNumber: "",
-      newSource: "",
-      newDescription: "",
-      newCategory: ""
     };
   }
   /**
    * Get the current address from the default map position and set those values in the state
    */
   componentDidMount() {
-    console.log("ComponentDidMount")
     Geocode.fromLatLng(
       this.state.mapPosition.lat,
       this.state.mapPosition.lng
@@ -81,7 +77,8 @@ class Map extends React.Component {
       this.state.address !== nextState.address ||
       this.state.city !== nextState.city ||
       this.state.area !== nextState.area ||
-      this.state.state !== nextState.state
+      this.state.state !== nextState.state ||
+      (this.props.newRecord !== nextProps.newRecord)
     ) {
       return true;
     } else if (this.props.center.lat === nextProps.center.lat) {
@@ -227,8 +224,20 @@ class Map extends React.Component {
 
   render() {
     let tmpData = [...dummyLocation.data]
-    tmpData.push("hello")
-    console.log(tmpData)
+    let tmpReceived = this.props.newRecord;
+    const {newIncidentNumber,newType, newSource, newDescription} = tmpReceived;
+    if(newIncidentNumber && newType && newSource && newDescription){
+      let newAdded = {
+        "INCIDENT_NUMBER": newIncidentNumber,
+        "TYPE": newType,
+        "SOURCE": newSource,
+        "DESCRIPTION": newDescription,
+        "coordinates": [43.6487763240599 , -79.37150329620363]
+      }
+      tmpData.push(newAdded);
+    }
+    console.log("new record", this.props.newRecord)
+    // return <h1>{this.props.newRecord.newIncidentNumber}</h1>
     const AsyncMap = withScriptjs(
       withGoogleMap(props => (
         <GoogleMap
@@ -248,20 +257,20 @@ class Map extends React.Component {
             types={["(regions)"]}
           />
           {/*Marker*/}
-          {dummyLocation.data.map( location =>
+          {tmpData.map( location =>
             <Marker
-              key={location.properties.INCIDENT_NUMBER}
+              key={location.INCIDENT_NUMBER}
               draggable={true}
               onDragEnd={this.onMarkerDragEnd}
               position={{
-                lat: location.properties.coordinates[0],
-                lng: location.properties.coordinates[1]
+                lat: location.coordinates[0],
+                lng: location.coordinates[1]
               }}
               animation={2}
               icon={{
-                url: location.properties.TYPE === "CCTV" ? 
+                url: location.TYPE === "CCTV" ? 
                   "http://maps.google.com/mapfiles/ms/icons/red-dot.png" :
-                  location.properties.TYPE === "CRIME SCENE"?
+                  location.TYPE === "CRIME SCENE"?
                   "http://maps.google.com/mapfiles/ms/icons/green-dot.png":
                   "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
                 scaledSize: { width: 45, height: 45 }
@@ -270,10 +279,11 @@ class Map extends React.Component {
               onClick={() => {
                 this.setState({
                   selected: true, 
-                  markerPosition: {lat: location.properties.coordinates[0], lng:location.properties.coordinates[1]},
-                  address: location.properties.ADDRESS,
-                  source: location.properties.SOURCE,
-                  claimNumber: location.properties.INCIDENT_NUMBER
+                  markerPosition: {lat: location.coordinates[0], lng:location.coordinates[1]},
+                  address: location.ADDRESS,
+                  source: location.SOURCE,
+                  claimNumber: location.INCIDENT_NUMBER,
+                  description: location.DESCRIPTION
                 })
               }}
             />
@@ -291,7 +301,7 @@ class Map extends React.Component {
               <div>
                 <h4>Incident Number: {this.state.claimNumber}</h4>
                 <p>Source: {this.state.source}</p>
-                <p>{this.state.address}</p>
+                <p>Description: {this.state.description}</p>
               </div>
             </InfoWindow>)
           }
@@ -302,30 +312,6 @@ class Map extends React.Component {
     if (this.props.center.lat !== undefined) {
       map = (
         <div>
-          {/* <div style={{float:"left", width:`50%`}}>
-            <form className="ui form" onSubmit={this.onSubmit}>
-              <div style={{width: `50%`}}>
-                <label>Incident Number</label>
-                <input type="text" name="incidentNum" value={this.state.newIncidentNumber} onChange={this.handleChange} />
-                <label>Source</label>
-                <input type="text" name="source" />
-                <label>Description</label>
-                <input type="text" name="description" />
-              </div>
-              <div style={{float: `right`}}>
-                <input type="checkbox" id="vehicle1" name="vehicle1" value="Bike"/>
-                <label> CCTV</label>
-                <input type="checkbox" id="vehicle2" name="vehicle2" value="Car"/>
-                <label> Crime Scene</label>
-                <input type="checkbox" id="vehicle3" name="vehicle3" value="Boat"/>
-                <label> Vendor</label>
-              </div>
-
-
-              <input type="submit" value="Submit" />
-              <button type="button" className="ui cancel button" onClick={() => console.log("hello ")}>Clear</button>
-            </form>
-          </div> */}
           <div style={{float: "right", width: `50%`}}>
             <AsyncMap
               googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0F5K2kf6hXig1dU0HGlRzKcnPWs270OY&v=3.exp&libraries=geometry,drawing,places"
