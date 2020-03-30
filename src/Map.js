@@ -76,7 +76,9 @@ class Map extends React.Component {
       },
       selected: false,
       incidents: [...dummyLocation.data],
-      refEntry: {}
+      refEntry: {},
+      type: "",
+      index: 0
     };
   }
   /**
@@ -248,6 +250,15 @@ addIncident(newIncident, ref) {
   refEntry: ref});
 }
 
+  onLocationChange = e => {
+    let incidents = this.state.incidents;
+    incidents[this.state.index].TYPE = e.target.value;
+    this.setState({
+      incidents,
+      type: e.target.value
+    })
+  }
+
   render() {
     let tmpReceived = this.props.newRecord;
     const {newIncidentNumber,newType, newSource, newDescription} = tmpReceived;
@@ -341,7 +352,9 @@ addIncident(newIncident, ref) {
                   address: location.ADDRESS,
                   source: location.SOURCE,
                   claimNumber: location.INCIDENT_NUMBER,
-                  description: location.DESCRIPTION
+                  description: location.DESCRIPTION,
+                  type: location.TYPE,
+                  index: index
                 })
               }}
             />
@@ -360,6 +373,11 @@ addIncident(newIncident, ref) {
                 <h4>Incident Number: {this.state.claimNumber}</h4>
                 <p>Source: {this.state.source}</p>
                 <p>Description: {this.state.description}</p>
+                <select value={this.state.type} onChange={this.onLocationChange}>
+                  <option value="CCTV">CCTV</option>
+                  <option value="CRIME SCENE">CRIME SCENE</option>
+                  <option value="VENDOR">VENDOR</option>
+                </select>
               </div>
             </InfoWindow>)
           }
