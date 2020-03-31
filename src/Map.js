@@ -78,7 +78,8 @@ class Map extends React.Component {
       incidents: [...dummyLocation.data],
       refEntry: {},
       type: "",
-      index: 0
+      index: 0,
+      dragged: false
     };
   }
   /**
@@ -127,7 +128,8 @@ class Map extends React.Component {
       return true;
     } else if (this.props.center.lat === nextProps.center.lat) {
       return false;
-    }
+    } 
+    
   }
   /**
    * Get the city and set the city input value to the one selected
@@ -318,7 +320,9 @@ addIncident(newIncident, ref) {
                       address: address ? address : "",
                       area: area ? area : "",
                       city: city ? city : "",
-                      state: state ? state : ""
+                      state: state ? state : "",
+                      markerPosition: {lat: newLat, lng: newLng},
+                      dragged: true
                     });
                   },
                   error => {
@@ -346,6 +350,9 @@ addIncident(newIncident, ref) {
               }}
 
               onClick={() => {
+                if(this.state.dragged){
+                  this.setState({dragged: false})
+                }
                 this.setState({
                   selected: true, 
                   markerPosition: {lat: location.coordinates[0], lng:location.coordinates[1]},
@@ -361,7 +368,7 @@ addIncident(newIncident, ref) {
           )}
           {/* InfoWindow on top of marker */}
           { 
-            this.state.selected && (
+            this.state.selected && !this.state.dragged && (
             <InfoWindow
               onClose={this.onInfoWindowClose}
               position={{
