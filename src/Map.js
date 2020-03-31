@@ -79,7 +79,8 @@ class Map extends React.Component {
       refEntry: {},
       type: "",
       index: 0,
-      dragged: false
+      dragged: false,
+      newPinned: false
     };
   }
   /**
@@ -240,7 +241,8 @@ class Map extends React.Component {
           lat: latValue,
           lng: lngValue
         },
-        incidents: tmpMarkers
+        incidents: tmpMarkers,
+        newPinned: true
       });
     }
   };
@@ -322,6 +324,7 @@ addIncident(newIncident, ref) {
                       city: city ? city : "",
                       state: state ? state : "",
                       markerPosition: {lat: newLat, lng: newLng},
+                      mapPosition: {lat: newLat, lng: newLng},
                       dragged: true
                     });
                   },
@@ -350,12 +353,17 @@ addIncident(newIncident, ref) {
               }}
 
               onClick={() => {
+                if(this.state.newPinned && this.state.dragged){
+                  this.setState({newPinned: false})
+                }
                 if(this.state.dragged){
                   this.setState({dragged: false})
                 }
+
                 this.setState({
                   selected: true, 
                   markerPosition: {lat: location.coordinates[0], lng:location.coordinates[1]},
+                  mapPosition: {lat: location.coordinates[0], lng:location.coordinates[1]},
                   address: location.ADDRESS,
                   source: location.SOURCE,
                   claimNumber: location.INCIDENT_NUMBER,
@@ -368,7 +376,7 @@ addIncident(newIncident, ref) {
           )}
           {/* InfoWindow on top of marker */}
           { 
-            this.state.selected && !this.state.dragged && (
+            this.state.selected && !this.state.dragged && !this.state.newPinned && (
             <InfoWindow
               onClose={this.onInfoWindowClose}
               position={{
