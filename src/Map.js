@@ -278,8 +278,8 @@ addIncident(newIncident, ref) {
           "DESCRIPTION": newEntry[i].newDescription,
           "coordinates": [tmpLat , tmpLng]
         }
-        tmpLat += 0.00008
-        tmpLng += 0.00008
+        tmpLat += 0.00010
+        tmpLng += 0.00010
         this.addIncident(newAdded, tmpReceived);
       }
     }
@@ -374,9 +374,11 @@ addIncident(newIncident, ref) {
               }}
             />
           )}
-          {/* InfoWindow on top of marker */}
+          {/* InfoWindow on top of marker */
+            console.log(this.state.dragged, this.state.newPinned, this.state.selected)
+          }
           { 
-            this.state.selected && !this.state.dragged && !this.state.newPinned && (
+            this.state.selected  && !this.state.newPinned && (
             <InfoWindow
               onClose={this.onInfoWindowClose}
               position={{
